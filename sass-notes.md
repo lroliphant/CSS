@@ -5,7 +5,6 @@
 ### & 
 
 
-
 ```
 .blog {
   > h1 {
@@ -197,3 +196,136 @@ a {
 - the underscore at the beginning of the file name means that Sass knows not to generate a separate css file for that scss file
 - order of imported styles is important - for example the globals will come first and any page specific styles that override global styles will come next - cascade
 
+##### Bourbon
+
+[http://bourbon.io/]
+[http://bourbon.io/docs/#linear-gradient]
+[http://bourbon.io/docs/#font-family]
+
+
+### Sass functions
+```
+$color: #369
+
+@function pxify($value) {
+  @return unquote($value + "px");
+}
+
+.red {
+  background: red;
+  width: pxify(red($color));
+}
+```
+[Function directives](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#function_directives)
+
+
+### Debugging Sass
+* Whenever you see an error referenced at the end of the file - it usually means a curly brace is missing earlier in the file
+* to see line number in sass that css is generated from - useful when using lots of files, extends and mixins - sometimes hard to know where something came from
+```
+sass -l main.scss:main.css
+```
+* [@debug](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#_4)
+
+
+### Media Queries
+* Add media queries inline in scss:
+```
+.content {
+  .sidebar {
+    background: #999;
+    color: white
+    padding: 5px;
+    float: left;
+    width: 100px;
+    @media (max-width: 480px) {
+      width: 95%;
+    }
+  }
+}
+```
+[using @media directive](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#media)
+
+
+### Interpolation and if/else statements
+* interpolation - slotting values into other values
+
+```
+@mixin color_class($color) {
+	.#{$color}.color {
+		color: $color;
+		background-image: url("images/#{$color}.jpg");
+		@if $color == red {
+			border: 1px solid black;
+		}
+	}
+}
+
+@include color_class(blue);
+@include color_class(red);
+@include color_class(green);
+```
+
+[@if and @else statements](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#_6)
+
+
+### Creating loops with @for and @each
+
+* @for loop is used when you want to iterate or go through numbers
+[@for](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#_7)
+
+* @each loop is used when ...
+[@each](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#each-directive)
+
+```.box {
+	width: 100%;
+	height: 10px;
+}
+
+@each $member in thom, jonny, colin, phil {
+	.bandmember.#{$member} {
+		background: url("images/#{$member}.jpg")
+	}
+}
+
+@for $i from 1 through 100 {
+	.box:nth-child(#{$i}) {
+		background: darken(white, $i);
+	}
+}
+
+```
+
+### Advanced Mixing Arguments
+
+```
+@mixin box($size: 10px, $color: black, $display: block) {
+	width: $size;
+	height: $size;
+	background: $color;
+	display: $display;
+}
+
+.box {
+	@include box($display: inline);
+}
+
+
+@mixin band($name, $members...) {
+	@each $member in $members {
+		.#{$name}.#{$member} {
+			background: url("images/#{$name}/#{$member}.jpg")
+		}
+	}
+}
+
+@include band(radiohead, thom, jonny, colin, phil);
+@include band(nin, trent);
+```
+
+* can pass default values into mixin parameters
+
+[Passing Content Blocks to a Mixin](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#mixin-content)
+[Variable Scope and Content Blocks](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#variable_scope_and_content_blocks)
+[Keyword Arguments](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#keyword_arguments_2)
+[Variable Arguments](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#variable_arguments)

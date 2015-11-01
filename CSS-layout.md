@@ -248,6 +248,13 @@ body {
 ```
 [IE 10 syntax](https://msdn.microsoft.com/library/hh673531)
 
+[align-self property](https://developer.mozilla.org/en-US/docs/Web/CSS/align-self)
+
+[flex-grow property](https://developer.mozilla.org/en-US/docs/Web/CSS/flex-grow)
+
+/* Example of project using flexbox -
+http://codepen.io/mborsare/pen/OybBJP */
+
 #### Modenizr
 * detects if a feature is supported by the browser and if it isn't
 can customise for your purposes ie. testing if flexbox is supported
