@@ -277,7 +277,8 @@ sass -l main.scss:main.css
 * @each loop is used when ...
 [@each](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#each-directive)
 
-```.box {
+```
+.box {
 	width: 100%;
 	height: 10px;
 }
