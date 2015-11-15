@@ -126,6 +126,12 @@ body,
 
 * Content wraps around floated elements
 * Floating an element takes it out of the normal document flow, which sometimes causes the parent element to collapse, because it no longer honours the space of the content inside it
+* You should always set a width on floated items (except if applied directly to an image – which has implicit width). Otherwise, it will fill its containing block horizontally, just like non-floated content, leaving no room for other content to flow around it.
+* When we float an element it is shifted to the right or to the left until it reaches the edge of the containing block. If we then float another element nearby in the same direction, it will be shifted until its edge reaches the edge of the first floating element. […] If we float more elements in the same direction they will stack up, but sooner or later we’ll run out of space […] when there is insufficient space on the line, they are shifted downward until they fit.
+* The potential drawback to using floats to contain floats is that you rely on browsers to consistently interpret the layout of multiple nested floated elements. The situation becomes more fragile if these floats are part of a more complicated layout, one possibly using floats, positioning, or tables.
+* [Float theory](http://www.smashingmagazine.com/2007/05/css-float-theory-things-you-should-know/)
+
+
 
 #### Clear fix
 ```

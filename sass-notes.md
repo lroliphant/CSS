@@ -326,7 +326,304 @@ sass -l main.scss:main.css
 
 * can pass default values into mixin parameters
 
-[Passing Content Blocks to a Mixin](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#mixin-content)
-[Variable Scope and Content Blocks](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#variable_scope_and_content_blocks)
-[Keyword Arguments](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#keyword_arguments_2)
-[Variable Arguments](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#variable_arguments)
+* [Passing Content Blocks to a Mixin](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#mixin-content)
+* [Variable Scope and Content Blocks](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#variable_scope_and_content_blocks)
+* [Keyword Arguments](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#keyword_arguments_2)
+* [Variable Arguments](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#variable_arguments)
+
+
+## Modular CSS w Sass
+
+* [@if directive](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#_9)
+
+* The @if directive takes a SassScript expression and uses the styles nested beneath it if the expression returns anything other than false or null:
+
+```
+p {
+  @if 1 + 1 == 2 { border: 1px solid;  }
+  @if 5 < 3      { border: 2px dotted; }
+  @if null       { border: 3px double; }
+}
+```
+is compiled to:
+```
+p {
+  border: 1px solid; }
+```
+
+
+```
+// variable-exists is a sass introspection function that returns whether a variable with a given name exists in our project
+@if variable-exists(font-url) {
+  // do something
+  @import url($font-url--google);
+}
+```
+
+
+
+### Px to em
+
+* Commonly used function that converts px to em
+```
+// _utilities.scss
+@function em($target, $context: $base__font-size) {
+  @return ($target / $context) * 1em;
+}
+```
+
+```
+// _base.scss
+body {
+  font-size: $base__font-size;
+  line-height: ($base__line/$base__font-size);
+  font-family: $font-family--primary;
+}
+
+// using em function defined above
+header {
+  padding: em(48px) 0;
+}
+
+h1 {
+  font-size: em(42px);
+  line-height: (46px / 42px);
+  margin-bottom: em(70px, 42px);
+}
+```
+
+
+### Colours w Sass maps
+
+* Sass maps can help to give our base colours a theme name - these theme names will come in handy later when we need o create classes for UI elements like buttons, form elements, progress bars, and more.
+* Sass maps allow us to collet values in named grop by matching keys to values
+
+* [Sass maps](http://sass-lang.com/documentation/file.SASS_REFERENCE.html#maps)
+
+* to retrieve values from maps we use key value pairs, e.g.
+```
+// _config.scss
+$ui-colours: (
+  default : $foundation-blue,
+  success : $emerald,
+  error   : $sunglo,
+  warning : $coral,
+  info    : $purple-majesty
+);
+```
+
+* each directive to dynamically generate a class name for each key in our map and and outputs it's associated colour value as a background colour
+
+* theme and colour variables represent the key, value pairs in the ui-colours map - so for each theme and colour in the ui-colours map, create this class selector for each key that dynamically appends the theme name with this theme variable, then pass its associated value as the background colour - outputting a css rule for each given theme name
+
+```
+@each $theme, $colour in $ui-colours {
+  .btn--#{$theme} {
+    background-color: $color;
+  }
+}
+```
+
+* wrap in a mixin to make the above more modular and reusable
+```
+// _utilities.scss
+@mixin bg-colours($map) {
+  @each $theme, $colour in $map {
+    &--#{$theme} {
+      background-color: $color;
+    }
+  }
+}
+```
+
+```
+// _main.scss
+.btn,
+.tooltip {
+  @include bg-colours($ui-colours);
+}
+```
+
+* creating shades and tones for some of our base colours using nested Sass maps:
+```
+// _config.scss
+
+// colour palette modifiers
+$palettes: (
+  grey: (
+    x-light :  lighten($grey, 35%),
+    light   :  lighten($grey, 12%),
+    base    :  $grey,
+    dark    :  darken($grey, 8%),
+    x-dark  :  darken($grey, 16%)
+  ),
+  black: (
+    light : lighten($black, 10%),
+    base  : $black,
+    dark  : darken($black, 10%)
+  )
+);
+
+// UI colours
+$ui-colours: (
+  default : $foundation-blue,
+  success : $emerald,
+  error   : $sunglo,
+  warning : $coral,
+  info    : $purple-majesty
+);
+```
+
+* to use these colour values in our Sass rule we use the map get function - to return a value in a map based on the key passed in
+```
+// _utilities.scss
+
+// call the colour palette modifiers
+
+@function palette($palette, $shade: 'base') {
+  @return map-get(map-get($palettes, $palette), $shade);
+}
+
+```
+```
+h1 {
+  color: palette(grey, x-dark);
+}
+```
+
+### Background image mixin
+
+* helper mixin that makes it easier to define an element's background image, width, height, and display property:
+```
+```
+
+* helper mixin for generating pseudo-element shapes:
+```
+//_config.scss
+
+// Path to Assets
+
+$path--rel : "../img";
+```
+
+```
+// _utilities.scss
+
+@mixin img-replace($img, $w, $h, $disp: block) {
+  background-image: url('#{$path-rel}/#{$img}');
+  background-repeat: no-repeat;
+  width: $w;
+  height: $h;
+  display: $disp;
+}
+```
+
+```
+// _main.scss
+
+.site-logo {
+  @include img-replace("logo.svg", 50px, 35px, inline-block );
+}
+```
+
+* create pseudo placeholder for some common properties and values
+```
+// _helpers.scss
+
+%pseudos {
+  display: block;
+  content: '';
+  position: absolute;
+}
+```
+
+* mixin for generating pseudo element shapes, specifically a toggle menu icon using the :before and :after pseudo elements:
+```
+// _utilities.scss
+
+@mixin p-element($element, $element-w: null, $element-h: null) {
+  &:#{$element} {
+    @extend %pseudos;
+    width: $element-w;
+    height: $element-h;
+    @content;
+  }
+}
+
+```
+
+* [Modular Pseudo-Elements with Sass](http://blog.teamtreehouse.com/modular-pseudo-elements-sass)
+* [Smarter Sass Mixins with Null](http://blog.teamtreehouse.com/smarter-sass-mixins-null)
+
+
+### Pseudo-Element Mixin with @error
+ * build the toggle icon using our new pseudo-element mixinabove and also learn how the new @error directive is useful for displaying error messages in mixins and functions. 
+
+```
+<nav role="navigation">
+  <span class="icn-toggle>
+    <b class="screen-reader-txt">Toggle</b>
+  </span>
+</nav>
+```
+
+```
+// _main.scss
+
+.icn-toggle {
+  @include p-element(before, 25px, 3px) {
+    background: palette(grey, light);
+    top: 4px;
+  }
+  width: 25px;
+  height: 17px;
+  position: absolute;
+  border-top: solid 3px palette(grey);
+  border-bottom: solid 3px palette(grey);
+}
+```
+
+* give mixin a failsafe feature using Sass's @if and @warn/@error (latter for newer versions of Sass) directives, so css is only outputted if $element is a before or after pseudo element
+```
+// _utilities.scss
+
+@mixin p-element($element, $element-w: null, $element-h: null) {
+  
+  @if $element == "before" or $element == "after" {
+    &:#{$element} {
+      @extend %pseudos;
+      width: $element-w;
+      height: $element-h;
+      @content;
+    }
+  }
+  @else {
+    @error "'#{$element}' is not a valide psuedo element.";
+  }
+}
+
+```
+
+
+
+to get sass to watch for changes - type the following into command line:
+```
+sass --watch scss:css
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### Simplying Sass with ampersands
+
+* In Sass, & references the parent selector of a declaration block, allowing the selector to be referenced from within itself
